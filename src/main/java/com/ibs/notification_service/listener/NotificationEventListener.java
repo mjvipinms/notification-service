@@ -17,30 +17,46 @@ public class NotificationEventListener {
     private final EmailNotificationService emailNotificationService;
     private final ObjectMapper objectMapper;
 
+    /**
+     *
+     * @param event event to be sent
+     */
     @KafkaListener(topics = "interview-events", groupId = "notification-service-group")
     public void consume(NotificationEvent event) {
         try {
             log.info("Received NotificationEvent: {}", event);
-
             switch (event.getEventType()) {
                 case "INTERVIEWCREATED" -> {
                     InterviewCreatedEvent createdEvent = mapTo(event.getPayload(), InterviewCreatedEvent.class);
                     handleInterviewCreated(createdEvent);
                 }
-                // You can add more cases later
-                // case "INTERVIEWUPDATED" -> handleInterviewUpdated(mapTo(event.getPayload(), InterviewUpdatedEvent.class));
-
+                case "INTERVIEWUPDATED" -> {
+                    InterviewCreatedEvent createdEvent = mapTo(event.getPayload(), InterviewCreatedEvent.class);
+                    handleInterviewReschedule(createdEvent);
+                }
                 default -> log.warn(" Unknown event type received: {}", event.getEventType());
             }
-
         } catch (Exception e) {
             log.error(" Exception while processing event: {}", e.getMessage(), e);
         }
     }
 
+    /**
+     *
+     * @param event to be sent
+     */
     private void handleInterviewCreated(InterviewCreatedEvent event) {
         log.info("Handling InterviewCreatedEvent for Interview ID: {}", event.getInterviewId());
         emailNotificationService.sendInterviewCreatedMail(event);
+    }
+
+    /**
+     *
+     * @param event to be sent
+     */
+    private void handleInterviewReschedule(InterviewCreatedEvent event) {
+        log.info("Handling handleInterviewReschedule for Interview ID: {}", event.getInterviewId());
+        emailNotificationService.sendInterviewRescheduledMail(event);
     }
 
     private <T> T mapTo(Object data, Class<T> targetType) {

@@ -20,6 +20,10 @@ public class EmailNotificationService {
     private final JavaMailSender mailSender;
     private final NotificationRepository notificationRepository;
 
+    /**
+     *
+     * @param event to be sent
+     */
     public void sendInterviewCreatedMail(InterviewCreatedEvent event) {
         sendMail(event.getCandidateEmail(), "Interview Scheduled",
                 "Dear Candidate,<br>Your interview is scheduled for <b>" + event.getStartTime() + "</b>.");
@@ -31,6 +35,27 @@ public class EmailNotificationService {
                 "Dear HR,<br>An interview has been created for candidate associated with ID: " + event.getInterviewId());
     }
 
+    /**
+     *
+     * @param event to be sent
+     */
+    public void sendInterviewRescheduledMail(InterviewCreatedEvent event) {
+        sendMail(event.getCandidateEmail(), "Interview Rescheduled",
+                "Dear Candidate,<br>Your interview is scheduled for <b>" + event.getStartTime() + "</b>.");
+
+        sendMail(event.getPanelEmail(), "Interview Assigned",
+                "Dear Panel,<br>You have a new interview rescheduled for <b>" + event.getStartTime() + "</b>.");
+
+        sendMail(event.getHrEmail(), "Interview Confirmation",
+                "Dear HR,<br>An interview has been rescheduled for candidate associated with ID: " + event.getInterviewId());
+    }
+
+    /**
+     *
+     * @param to recipient email
+     * @param subject subject of the mail
+     * @param htmlContent content
+     */
     private void sendMail(String to, String subject, String htmlContent) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
