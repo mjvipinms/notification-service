@@ -19,4 +19,5 @@ public class InterviewCreatedEvent extends BaseEvent{
     private String panelEmail;
     private String hrEmail;
     private LocalDateTime startTime;
+    private String createdBy;
 }

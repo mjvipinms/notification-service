@@ -1,9 +1,11 @@
 package com.ibs.notification_service.service;
 
+import com.ibs.notification_service.cache.UserCacheService;
 import com.ibs.notification_service.context.UserContext;
 import com.ibs.notification_service.dtos.requestDto.NotificationRequestDto;
 import com.ibs.notification_service.dtos.responseDto.NotificationResponseDto;
 import com.ibs.notification_service.dtos.responseDto.PagedResponseDto;
+import com.ibs.notification_service.dtos.responseDto.UserResponseDTO;
 import com.ibs.notification_service.entity.Notification;
 import com.ibs.notification_service.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,6 +25,8 @@ import java.util.stream.Collectors;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final UserCacheService userCacheService;
+
 
     /**
      *
@@ -29,7 +35,11 @@ public class NotificationService {
      */
     public PagedResponseDto<NotificationResponseDto> getNotificationsByUser(String userId, int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
-        Page<Notification> notificationPage = notificationRepository.findByRecipient(userId, pageRequest);
+
+        List<UserResponseDTO> userList = userCacheService.getAllUsers();
+        Map<Integer, String> userNameMap = userList.stream().collect(Collectors.toMap(UserResponseDTO::getUserId, UserResponseDTO::getEmail));
+        String recipientEmail = userNameMap.get(Integer.valueOf(userId));
+        Page<Notification> notificationPage = notificationRepository.findByRecipient(recipientEmail, pageRequest);
 
         var content = notificationPage.getContent()
                 .stream()
@@ -49,11 +59,11 @@ public class NotificationService {
     /**
      *
      * @param notificationId notification entity id
-     * @param request notification request
+     * @param request        notification request
      * @return NotificationResponseDto
      */
     public NotificationResponseDto updateNotification(Integer notificationId, NotificationRequestDto request) {
-       log.info("Updating notification object using notificationId");
+        log.info("Updating notification object using notificationId");
         try {
             Notification notification = notificationRepository.findById(notificationId)
                     .orElseThrow(() -> new RuntimeException("Notification not found with ID: " + notificationId));
