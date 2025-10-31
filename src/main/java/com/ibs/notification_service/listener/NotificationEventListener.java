@@ -32,6 +32,10 @@ public class NotificationEventListener {
                 }
                 case "INTERVIEWUPDATED" -> {
                     InterviewCreatedEvent createdEvent = mapTo(event.getPayload(), InterviewCreatedEvent.class);
+                    handleInterviewUpdate(createdEvent);
+                }
+                case "INTERVIEWRESCHEDULE" -> {
+                    InterviewCreatedEvent createdEvent = mapTo(event.getPayload(), InterviewCreatedEvent.class);
                     handleInterviewReschedule(createdEvent);
                 }
                 default -> log.warn(" Unknown event type received: {}", event.getEventType());
@@ -39,6 +43,15 @@ public class NotificationEventListener {
         } catch (Exception e) {
             log.error(" Exception while processing event: {}", e.getMessage(), e);
         }
+    }
+
+    /**
+     *
+     * @param createdEvent event that trigger notification
+     */
+    private void handleInterviewUpdate(InterviewCreatedEvent createdEvent) {
+        log.info("Handling handleInterviewUpdate for Interview ID: {}", createdEvent.getInterviewId());
+        emailNotificationService.sendInterviewUpdateMail(createdEvent);
     }
 
     /**

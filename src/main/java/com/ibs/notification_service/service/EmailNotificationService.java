@@ -48,7 +48,7 @@ public class EmailNotificationService {
      */
     public void sendInterviewRescheduledMail(InterviewCreatedEvent event) {
         sendMail(event.getCandidateEmail(), "Interview Rescheduled",
-                "Dear Candidate,<br>Your interview is scheduled for <b>" + event.getStartTime() + "</b>." +
+                "Dear Candidate,<br>Your interview is rescheduled for <b>" + event.getStartTime() + "</b>." +
                         "<br>Thanks & Regards," +
                         "<br>IBS Talent Team", event.getCreatedBy());
 
@@ -105,5 +105,28 @@ public class EmailNotificationService {
         if (email == null) return false;
         Matcher matcher = EMAIL_PATTERN.matcher(email.trim());
         return matcher.matches();
+    }
+
+    /**
+     *
+     * @param event data
+     */
+    public void sendInterviewUpdateMail(InterviewCreatedEvent event) {
+        sendMail(event.getCandidateEmail(), "Interview Feedback",
+                "Dear Candidate,<br> Please be updated with your interview feedback. Our HR team will contact you soon" +
+                        "<br>Thanks & Regards," +
+                        "<br>IBS Talent Team", event.getCreatedBy());
+
+        sendMail(event.getPanelEmail(), "Interview Feedback",
+                "Dear Panel,<br>You updated the interview feedback and status.Please contact HR for next steps" +
+                        "<br>Thanks & Regards," +
+                        "<br>IBS Talent Team", event.getCreatedBy());
+
+        sendMail(event.getHrEmail(), "Interview Feedback",
+                "Dear HR,<br>An interview has been updated with feedback and status for candidate associated with ID: <b>"
+                        + event.getInterviewId() + "</b>."
+                        + "<br><br>Thanks & Regards,"
+                        + "<br><strong>IBS Talent Team</strong>", event.getCreatedBy()
+        );
     }
 }
